@@ -7,7 +7,6 @@ using MongoDB.Driver;
 using UseCases;
 
 
-
 [ApiController]
 [Route("[controller]")]
 public class ArticleController(ILogger<ArticleController> logger, IMongoDbConnector mongoDbConnector) : ControllerBase
@@ -16,29 +15,31 @@ public class ArticleController(ILogger<ArticleController> logger, IMongoDbConnec
     public Article GetArticle([FromQuery] QueryArticleDisplay request)
     {
         logger.LogInformation($"{this.HttpContext.Request.Method} {this.HttpContext.Request.Path}");
+
         return mongoDbConnector.GetCollection<Article>()
         .Find(x => x.ArticleId == request.ArticleId).FirstOrDefault();
     }
-
-    
 
     [HttpPost]
     public Article CreateArticle([FromForm] CommandArticleCreate request)
     {
         logger.LogInformation($"{this.HttpContext.Request.Method} {this.HttpContext.Request.Path}");
+
         var article = Article.Create(request.Title, request.Description, request.Text);
+
         mongoDbConnector.GetCollection<Article>().InsertOne(article);
+
         return article;
     }
-
-
 
     [HttpPut]
     public Article EditArticle([FromForm] CommandArticleEdit request) 
     {
         logger.LogInformation($"{this.HttpContext.Request.Method} {this.HttpContext.Request.Path}");
+
         var article = mongoDbConnector.GetCollection<Article>()
         .Find(x => x.ArticleId == request.ArticleId).FirstOrDefault();
+
         if(article == null)
         {
             return default(Article);
@@ -55,15 +56,12 @@ public class ArticleController(ILogger<ArticleController> logger, IMongoDbConnec
         return article;
     }
 
-
-
     [HttpDelete]
     public Article DeleteArticle([FromForm] CommandArticleDelete request)
     {
         logger.LogInformation($"{this.HttpContext.Request.Method} {this.HttpContext.Request.Path}");
+
         return mongoDbConnector.GetCollection<Article>().FindOneAndDelete(x => x.ArticleId == request.ArticleId);
     }
-
-
 
 }
